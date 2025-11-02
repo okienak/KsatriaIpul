@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kesatria Ipul: Legend of the Sword Realm</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+      font-family: 'MedievalSharp', cursive;
+    }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      text-align: center;
+      color: #ffe4b5;
+      text-shadow: 0 0 10px #ffcc00;
+      z-index: 10;
+    }
+
+    .title {
+      font-size: 2.5em;
+      letter-spacing: 3px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #ff9900; }
+      to { text-shadow: 0 0 20px #ffff99; }
+    }
+
+    .hud {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+</head>
+<body>
+  <div id="ui">
+    <h1 class="title">⚔️ Kesatria Ipul ⚔️</h1>
+    <div class="hud">
+      <span>HP: ❤️❤️❤️</span>
+      <span>Level 1 - Hutan Ajaib</span>
+    </div>
+  </div>
+
+  <script>
+    // === Inisialisasi Three.js ===
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111122);
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // === Cahaya dan Tanah ===
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffcc88, 1);
+    dirLight.position.set(5, 10, 5);
+    scene.add(dirLight);
+
+    const groundGeometry = new THREE.PlaneGeometry(200, 200);
+    const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // === Karakter (Kesatria Ipul) ===
+    const bodyGeometry = new THREE.BoxGeometry(1, 2, 1);
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+    const ipul = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    scene.add(ipul);
+    ipul.position.y = 1;
+
+    const swordGeometry = new THREE.BoxGeometry(0.1, 1.5, 0.1);
+    const swordMaterial = new THREE.MeshStandardMaterial({ color: 0xccccff, emissive: 0x8888ff });
+    const sword = new THREE.Mesh(swordGeometry, swordMaterial);
+    sword.position.set(0.6, 1, 0);
+    ipul.add(sword);
+
+    camera.position.set(0, 3, 6);
+    camera.lookAt(ipul.position);
+
+    // === Kontrol Gerak ===
+    const keys = {};
+    document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+    let attackAnimation = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Gerakan dasar
+      if (keys['w']) ipul.position.z -= 0.1;
+      if (keys['s']) ipul.position.z += 0.1;
+      if (keys['a']) ipul.position.x -= 0.1;
+      if (keys['d']) ipul.position.x += 0.1;
+
+      // Serangan pedang (spasi)
+      if (keys[' ']) attackAnimation = Math.PI / 2;
+      if (attackAnimation > 0) {
+        sword.rotation.x = Math.sin(attackAnimation) * 1.5;
+        attackAnimation -= 0.1;
+      } else {
+        sword.rotation.x = 0;
+      }
+
+      // Kamera mengikuti Ipul
+      camera.position.x = ipul.position.x;
+      camera.position.z = ipul.position.z + 6;
+      camera.lookAt(ipul.position);
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // === Responsif saat ubah ukuran layar ===
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
